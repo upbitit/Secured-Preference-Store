@@ -93,7 +93,7 @@ public class EncryptionManager {
 
     private final String IS_COMPAT_MODE_KEY_ALIAS = "sps_data_in_compat";
 
-    private KeyStore mStore;
+    KeyStore mStore;
     private SecretKey aesKey;
     private SecretKey macKey;
 
