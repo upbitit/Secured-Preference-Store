@@ -28,12 +28,11 @@ public class SecuredPreferenceStore implements SharedPreferences {
 
     private final String PREF_FILE_NAME = "SPS_file";
 
-    private SharedPreferences mPrefs;
-    private EncryptionManager mEncryptionManager;
+    SharedPreferences mPrefs;
+    EncryptionManager mEncryptionManager;
 
-    private static RecoveryHandler mRecoveryHandler;
-
-    private static SecuredPreferenceStore mInstance;
+    static RecoveryHandler mRecoveryHandler;
+    static SecuredPreferenceStore mInstance;
 
     protected SecuredPreferenceStore(Context appContext) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException {
         Log.d("SECURE-PREFERENCE", "Creating store instance");
