@@ -107,8 +107,11 @@ public class EncryptionManager {
 
     SecuredPreferenceStore.KeyStoreRecoveryNotifier mRecoveryHandler;
 
-    public EncryptionManager(Context context, SharedPreferences prefStore, SecuredPreferenceStore.KeyStoreRecoveryNotifier recoveryHandler)
-            throws IOException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException, NoSuchPaddingException, CertificateException, KeyStoreException, UnrecoverableEntryException, InvalidKeyException, IllegalStateException {
+    public EncryptionManager(Context context, SharedPreferences prefStore,
+                             SecuredPreferenceStore.KeyStoreRecoveryNotifier recoveryHandler)
+            throws IOException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            NoSuchProviderException, NoSuchPaddingException, CertificateException, KeyStoreException,
+            UnrecoverableEntryException, InvalidKeyException, IllegalStateException {
         String isCompatKey = getHashed(IS_COMPAT_MODE_KEY_ALIAS);
         isCompatMode = prefStore.getBoolean(isCompatKey, Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
         mRecoveryHandler = recoveryHandler;

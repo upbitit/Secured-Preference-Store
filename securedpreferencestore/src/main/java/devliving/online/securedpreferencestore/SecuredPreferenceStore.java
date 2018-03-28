@@ -35,7 +35,7 @@ public class SecuredPreferenceStore implements SharedPreferences {
 
     private static SecuredPreferenceStore mInstance;
 
-    private SecuredPreferenceStore(Context appContext) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException {
+    protected SecuredPreferenceStore(Context appContext) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException {
         Log.d("SECURE-PREFERENCE", "Creating store instance");
         mPrefs = appContext.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
 
