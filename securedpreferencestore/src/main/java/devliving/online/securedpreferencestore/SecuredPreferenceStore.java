@@ -25,28 +25,13 @@ import javax.crypto.NoSuchPaddingException;
  * Created by Mehedi on 8/21/16.
  */
 public class SecuredPreferenceStore implements SharedPreferences {
-
-    private final String PREF_FILE_NAME = "SPS_file";
+    private static final String PREF_FILE_NAME = "SPS_file";
 
     SharedPreferences mPrefs;
     EncryptionManager mEncryptionManager;
 
     static RecoveryHandler mRecoveryHandler;
     static SecuredPreferenceStore mInstance;
-
-    protected SecuredPreferenceStore(Context appContext) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException {
-        Log.d("SECURE-PREFERENCE", "Creating store instance");
-        mPrefs = appContext.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-
-        mEncryptionManager = new EncryptionManager(appContext, mPrefs, new KeyStoreRecoveryNotifier() {
-            @Override
-            public boolean onRecoveryRequired(Exception e, KeyStore keyStore, List<String> keyAliases) {
-                if (mRecoveryHandler != null)
-                    return mRecoveryHandler.recover(e, keyStore, keyAliases, mPrefs);
-                else throw new RuntimeException(e);
-            }
-        });
-    }
 
     public static void setRecoveryHandler(RecoveryHandler recoveryHandler) {
         SecuredPreferenceStore.mRecoveryHandler = recoveryHandler;
@@ -75,7 +60,10 @@ public class SecuredPreferenceStore implements SharedPreferences {
      * @throws NoSuchProviderException
      */
     public static void init( Context appContext,
-                             RecoveryHandler recoveryHandler ) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException {
+                             RecoveryHandler recoveryHandler ) throws IOException,
+            CertificateException, NoSuchAlgorithmException, KeyStoreException,
+            UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException,
+            InvalidKeyException, NoSuchProviderException {
 
         if(mInstance != null){
             Log.w("SECURED-PREFERENCE", "init called when there already is a non-null instance of the class");
@@ -83,7 +71,16 @@ public class SecuredPreferenceStore implements SharedPreferences {
         }
 
         setRecoveryHandler(recoveryHandler);
-        mInstance = new SecuredPreferenceStore(appContext);
+        mInstance = new SecuredPreferenceStore();
+        mInstance.mPrefs = appContext.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        mInstance.mEncryptionManager = new EncryptionManager(appContext, mInstance.mPrefs, new KeyStoreRecoveryNotifier() {
+            @Override
+            public boolean onRecoveryRequired(Exception e, KeyStore keyStore, List<String> keyAliases) {
+                if (mRecoveryHandler != null)
+                    return mRecoveryHandler.recover(e, keyStore, keyAliases, mInstance.mPrefs);
+                else throw new RuntimeException(e);
+            }
+        });
     }
 
     public EncryptionManager getEncryptionManager() {
