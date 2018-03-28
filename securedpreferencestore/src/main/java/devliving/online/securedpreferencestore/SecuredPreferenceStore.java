@@ -33,6 +33,12 @@ public class SecuredPreferenceStore implements SharedPreferences {
     static RecoveryHandler mRecoveryHandler;
     static SecuredPreferenceStore mInstance;
 
+    public SecuredPreferenceStore() {
+    }
+
+    public SecuredPreferenceStore(Context context) {
+    }
+
     public static void setRecoveryHandler(RecoveryHandler recoveryHandler) {
         SecuredPreferenceStore.mRecoveryHandler = recoveryHandler;
     }
