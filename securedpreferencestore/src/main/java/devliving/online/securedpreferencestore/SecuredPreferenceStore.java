@@ -225,7 +225,7 @@ public class SecuredPreferenceStore implements SharedPreferences {
         do {
             try {
                 task.run();
-                retryCount = 0;
+                retryCount = 3;
             } catch (Exception e) {
                 retryCount++;
                 try {
