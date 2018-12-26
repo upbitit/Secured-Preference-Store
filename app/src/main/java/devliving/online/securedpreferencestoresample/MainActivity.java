@@ -106,6 +106,13 @@ public class MainActivity extends AppCompatActivity {
         new Thread(saveJob).start();
         new Thread(saveJob).start();
         new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
     }
 
     private void setupStore() {

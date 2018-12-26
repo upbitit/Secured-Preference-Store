@@ -25,6 +25,7 @@ import javax.crypto.NoSuchPaddingException;
  * Created by Mehedi on 8/21/16.
  */
 public class SecuredPreferenceStore implements SharedPreferences {
+    static final int MAX_RETRY_COUNT = 3;
     private static final String PREF_FILE_NAME = "SPS_file";
 
     SharedPreferences mPrefs;
@@ -225,8 +226,9 @@ public class SecuredPreferenceStore implements SharedPreferences {
         do {
             try {
                 task.run();
-                retryCount = 3;
+                retryCount = MAX_RETRY_COUNT;
             } catch (Exception e) {
+                e.printStackTrace();
                 retryCount++;
                 try {
                     Log.d("queen", Thread.currentThread().getName() + ", retryCount " + retryCount);
@@ -235,11 +237,11 @@ public class SecuredPreferenceStore implements SharedPreferences {
                     ee.printStackTrace();
                 }
 
-                if(retryCount == 3) {   // let's give up. no more retry.
+                if(retryCount == MAX_RETRY_COUNT) {   // let's give up. no more retry.
                     Log.e(SecuredPreferenceStore.class.getName(), "cannot access keystore");
                 }
             }
-        } while (retryCount >= 3);
+        } while (retryCount >= MAX_RETRY_COUNT);
     }
 
     public class Editor implements SharedPreferences.Editor {
