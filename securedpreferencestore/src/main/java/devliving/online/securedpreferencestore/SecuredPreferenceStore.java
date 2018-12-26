@@ -227,15 +227,42 @@ public class SecuredPreferenceStore implements SharedPreferences {
             mEditor = mPrefs.edit();
         }
 
+//        @Override
+//        public SharedPreferences.Editor putString(String key, String value) {
+//            try {
+//                String hashedKey = EncryptionManager.getHashed(key);
+//                String evalue = mEncryptionManager.encrypt(value);
+//                mEditor.putString(hashedKey, evalue);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//            return this;
+//        }
+
         @Override
-        public SharedPreferences.Editor putString(String key, String value) {
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                String evalue = mEncryptionManager.encrypt(value);
-                mEditor.putString(hashedKey, evalue);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        synchronized public SharedPreferences.Editor putString(String key, String value) {
+            int retryCount = 0;
+            do {
+                try {
+                    String hashedKey = EncryptionManager.getHashed(key);
+                    String evalue = mEncryptionManager.encrypt(value);
+                    mEditor.putString(hashedKey, evalue);
+                    retryCount = 0;
+                } catch (Exception e) {
+                    retryCount++;
+                    try {
+                        Log.d("king", Thread.currentThread().getName() + ", retryCount : " + retryCount);
+                        Thread.sleep(100 * retryCount);
+                    } catch (Exception ee) {
+                        ee.printStackTrace();
+                    }
+
+                    if(retryCount == 3) {
+                        // TODO: 26/12/2018 do what?
+                    }
+                }
+            } while (retryCount >= 3);
 
             return this;
         }

@@ -3,6 +3,7 @@ package devliving.online.securedpreferencestoresample;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -69,6 +70,42 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+        Runnable saveJob = new Runnable() {
+            @Override
+            public void run() {
+                Log.d("queen", Thread.currentThread().getName() + " gets started");
+                while(true) {
+//                    try {
+//                        Thread.sleep(0);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+                    saveData();
+                }
+            }
+        };
+
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
     }
 
     private void setupStore() {
