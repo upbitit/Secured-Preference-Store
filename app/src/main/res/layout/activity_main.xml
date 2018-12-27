@@ -83,5 +83,12 @@
                 android:layout_weight="1"
                 android:text="multi-threading" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/tryFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Encrypt/Decrypt Image/File"/>
     </LinearLayout>
 </ScrollView>

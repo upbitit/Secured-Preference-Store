@@ -1,5 +1,6 @@
 package devliving.online.securedpreferencestoresample;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     EditText text1, number1, date1, text2, number2;
 
-    Button reloadButton, saveButton, multiThreadingButton;
+    Button reloadButton, saveButton, multiThreadingButton, imageDemoBtn;
 
     String TEXT_1 = "text_short", TEXT_2 = "text_long", NUMBER_1 = "number_int", NUMBER_2 = "number_float", DATE_1 = "date_text", DATE_2 = "date_long";
 
@@ -40,10 +41,18 @@ public class MainActivity extends AppCompatActivity {
         reloadButton = (Button) findViewById(R.id.reload);
         saveButton = (Button) findViewById(R.id.save);
         multiThreadingButton = (Button) findViewById(R.id.multi_threading);
+        imageDemoBtn = findViewById(R.id.tryFile);
 
         try {
-            SecuredPreferenceStore.init(getApplicationContext(), new DefaultRecoveryHandler());
+            //not mandatory, can be null too
+            String storeFileName = "securedStore";
+            //not mandatory, can be null too
+            String keyPrefix = "vss";
+            //it's better to provide one, and you need to provide the same key each time after the first time
+            byte[] seedKey = "seed".getBytes();
+            SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, new DefaultRecoveryHandler());
 
+            //SecuredPreferenceStore.init(getApplicationContext(), null);
             setupStore();
         } catch (Exception e) {
             // Handle error.
@@ -56,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     reloadData();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("SECURED-PREFERENCE", "", e);
                     Toast.makeText(MainActivity.this, "An exception occurred, see log for details", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -68,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     saveData();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("SECURED-PREFERENCE", "", e);
                     Toast.makeText(MainActivity.this, "An exception occurred, see log for details", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -115,6 +124,12 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(saveJob).start();
             }
         });
+
+
+        imageDemoBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(this, FileDemoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void setupStore() {
@@ -129,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             reloadData();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("SECURED-PREFERENCE", "", e);
             Toast.makeText(this, "An exception occurred, see log for details", Toast.LENGTH_SHORT).show();
         }
     }
