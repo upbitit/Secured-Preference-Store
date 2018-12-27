@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     EditText text1, number1, date1, text2, number2;
 
-    Button reloadButton, saveButton;
+    Button reloadButton, saveButton, multiThreadingButton;
 
     String TEXT_1 = "text_short", TEXT_2 = "text_long", NUMBER_1 = "number_int", NUMBER_2 = "number_float", DATE_1 = "date_text", DATE_2 = "date_long";
 
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         reloadButton = (Button) findViewById(R.id.reload);
         saveButton = (Button) findViewById(R.id.save);
+        multiThreadingButton = (Button) findViewById(R.id.multi_threading);
 
         try {
             SecuredPreferenceStore.init(getApplicationContext(), new DefaultRecoveryHandler());
@@ -72,45 +73,48 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-        Runnable saveJob = new Runnable() {
+        multiThreadingButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                Log.d("queen", Thread.currentThread().getName() + " gets started");
-                while(true) {
-//                    saveData();
-                    reloadData();
-                }
-            }
-        };
+            public void onClick(View v) {
+                Runnable saveJob = new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("queen", Thread.currentThread().getName() + " gets started");
+                        while(true) {
+                            saveData();
+                            reloadData();
+                        }
+                    }
+                };
 
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
-        new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+            }
+        });
     }
 
     private void setupStore() {
