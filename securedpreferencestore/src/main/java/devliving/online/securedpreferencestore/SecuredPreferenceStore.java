@@ -505,20 +505,24 @@ public class SecuredPreferenceStore implements SharedPreferences {
         }
 
         @Override
-        public SharedPreferences.Editor remove(String key) {
+        public SharedPreferences.Editor remove(final String key) {
             if(isReservedKey(key)) {
                 Logger.e("Trying to remove value for a reserved key");
                 return this;
             }
 
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                mEditor.remove(hashedKey);
-            } catch (Exception e) {
-                Logger.e(e);
-            }
+            synchronized (SecuredPreferenceStore.class) {
+                retryFunction(new Function<Void, Void>() {
+                    @Override
+                    public Void apply(Void t) throws Exception {
+                        String hashedKey = EncryptionManager.getHashed(key);
+                        mEditor.remove(hashedKey);
+                        return null;
+                    }
+                }, null, null);
 
-            return this;
+                return this;
+            }
         }
 
         @Override
