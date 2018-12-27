@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,9 @@ import javax.crypto.NoSuchPaddingException;
  * Created by Mehedi on 8/21/16.
  */
 public class SecuredPreferenceStore implements SharedPreferences {
+    static final int DELAY = 100;                     // in nano seconds
+    static final int MAX_RETRY_COUNT = 3;
+
     private final static int[] VERSIONS_WITH_BREAKING_CHANGES = new int[]{10}; //version code in ascending order
     final static String VERSION_KEY = "VERSION";
     private final static String DEFAULT_PREF_FILE_NAME = "SPS_file";
@@ -44,6 +48,7 @@ public class SecuredPreferenceStore implements SharedPreferences {
     private static RecoveryHandler mRecoveryHandler;
 
     private static SecuredPreferenceStore mInstance;
+
 
     /**
      *
@@ -186,44 +191,91 @@ public class SecuredPreferenceStore implements SharedPreferences {
     }
 
     @Override
-    public String getString(String key, String defValue) {
+    public String getString(final String key, final String defValue) {
         if(!isReservedKey(key)) {
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                String value = mPrefs.getString(hashedKey, null);
-                if (value != null) return mEncryptionManager.decrypt(value);
-            } catch (Exception e) {
-                Logger.e(e);
+            synchronized (SecuredPreferenceStore.class) {
+                return retryFunction(new Function<Void, String>() {
+                    @Override
+                    public String apply(Void t) throws Exception {
+                        String hashedKey = EncryptionManager.getHashed(key);
+                        String value = mPrefs.getString(hashedKey, null);
+                        return value == null ? defValue : mEncryptionManager.decrypt(value);
+                    }
+                }, null, defValue);
             }
+        } else {
+            return defValue;
         }
-
-        return defValue;
     }
 
     @Override
-    public Set<String> getStringSet(String key, Set<String> defValues) {
+    public Set<String> getStringSet(final String key, final Set<String> defValues) {
         if(!isReservedKey(key)) {
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                Set<String> eSet = mPrefs.getStringSet(hashedKey, null);
+            synchronized (SecuredPreferenceStore.class) {
+                return retryFunction(new Function<Void, Set<String>>() {
+                    @Override
+                    public Set<String> apply(Void t) throws Exception {
+                        String hashedKey = EncryptionManager.getHashed(key);
+                        Set<String> eSet = mPrefs.getStringSet(hashedKey, null);
 
-                if (eSet != null) {
-                    Set<String> dSet = new HashSet<>(eSet.size());
+                        if (eSet != null) {
+                            Set<String> dSet = new HashSet<>(eSet.size());
 
-                    for (String val : eSet) {
-                        dSet.add(mEncryptionManager.decrypt(val));
+                            for (String val : eSet) {
+                                dSet.add(mEncryptionManager.decrypt(val));
+                            }
+
+                            return dSet;
+                        } else {
+                            return defValues;
+                        }
                     }
-
-                    return dSet;
-                }
-
-            } catch (Exception e) {
-                Logger.e(e);
+                }, null, defValues);
             }
+        } else {
+            return defValues;
         }
-
-        return defValues;
     }
+
+//    @Override
+//    public String getString(String key, String defValue) {
+//        if(!isReservedKey(key)) {
+//            try {
+//                String hashedKey = EncryptionManager.getHashed(key);
+//                String value = mPrefs.getString(hashedKey, null);
+//                if (value != null) return mEncryptionManager.decrypt(value);
+//            } catch (Exception e) {
+//                Logger.e(e);
+//            }
+//        }
+//
+//        return defValue;
+//    }
+//
+//    @Override
+//    public Set<String> getStringSet(String key, Set<String> defValues) {
+//        if(!isReservedKey(key)) {
+//            try {
+//                String hashedKey = EncryptionManager.getHashed(key);
+//                Set<String> eSet = mPrefs.getStringSet(hashedKey, null);
+//
+//                if (eSet != null) {
+//                    Set<String> dSet = new HashSet<>(eSet.size());
+//
+//                    for (String val : eSet) {
+//                        dSet.add(mEncryptionManager.decrypt(val));
+//                    }
+//
+//                    return dSet;
+//                }
+//
+//            } catch (Exception e) {
+//                Logger.e(e);
+//            }
+//        }
+//
+//        return defValues;
+//    }
 
     @Override
     public int getInt(String key, int defValue) {
@@ -299,6 +351,30 @@ public class SecuredPreferenceStore implements SharedPreferences {
             mPrefs.unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
+    protected <T, R> R retryFunction(Function<T, R> function, T t, R r) {
+        int retryCount = 0;
+        do {
+            try {
+                return function.apply(t);
+            } catch (Exception e) {
+//                e.printStackTrace();
+                retryCount++;
+                try {
+                    Log.d("queen", Thread.currentThread().getName() + ", retryCount " + retryCount);
+                    Thread.sleep(0,DELAY * retryCount);
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
+
+                if(retryCount == MAX_RETRY_COUNT) {   // let's give up. no more retry.
+                    Log.e(SecuredPreferenceStore.class.getName(), "cannot access keystore");
+                }
+            }
+        } while (retryCount >= MAX_RETRY_COUNT);
+
+        return r;
+    }
+
     public class Editor implements SharedPreferences.Editor {
         SharedPreferences.Editor mEditor;
 
@@ -306,45 +382,95 @@ public class SecuredPreferenceStore implements SharedPreferences {
             mEditor = mPrefs.edit();
         }
 
+//        @Override
+//        public SharedPreferences.Editor putString(String key, String value) {
+//            if(isReservedKey(key)) {
+//                Logger.e("Trying to store value for a reserved key, value: " + value);
+//                return this;
+//            }
+//
+//            try {
+//                String hashedKey = EncryptionManager.getHashed(key);
+//                String evalue = mEncryptionManager.encrypt(value);
+//                mEditor.putString(hashedKey, evalue);
+//            } catch (Exception e) {
+//                Logger.e(e);
+//            }
+//
+//            return this;
+//        }
+//
+//        @Override
+//        public SharedPreferences.Editor putStringSet(String key, Set<String> values) {
+//            if(isReservedKey(key)) {
+//                Logger.e("Trying to store value for a reserved key, value: " + values);
+//                return this;
+//            }
+//
+//            try {
+//                String hashedKey = EncryptionManager.getHashed(key);
+//                Set<String> eSet = new HashSet<String>(values.size());
+//
+//                for (String val : values) {
+//                    eSet.add(mEncryptionManager.encrypt(val));
+//                }
+//
+//                mEditor.putStringSet(hashedKey, eSet);
+//            } catch (Exception e) {
+//                Logger.e(e);
+//            }
+//
+//            return this;
+//        }
+
         @Override
-        public SharedPreferences.Editor putString(String key, String value) {
+        public SharedPreferences.Editor putString(final String key, final String value) {
             if(isReservedKey(key)) {
                 Logger.e("Trying to store value for a reserved key, value: " + value);
                 return this;
             }
 
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                String evalue = mEncryptionManager.encrypt(value);
-                mEditor.putString(hashedKey, evalue);
-            } catch (Exception e) {
-                Logger.e(e);
-            }
+            synchronized (SecuredPreferenceStore.class) {
+                retryFunction(new Function<Void, Void>() {
+                    @Override
+                    public Void apply(Void t) throws Exception {
+                        String hashedKey = EncryptionManager.getHashed(key);
+                        String evalue = mEncryptionManager.encrypt(value);
+                        mEditor.putString(hashedKey, evalue);
+                        return null;
+                    }
+                }, null, null);
 
-            return this;
+                return this;
+            }
         }
 
         @Override
-        public SharedPreferences.Editor putStringSet(String key, Set<String> values) {
+        public SharedPreferences.Editor putStringSet(final String key,
+                                                                  final Set<String> values) {
             if(isReservedKey(key)) {
                 Logger.e("Trying to store value for a reserved key, value: " + values);
                 return this;
             }
 
-            try {
-                String hashedKey = EncryptionManager.getHashed(key);
-                Set<String> eSet = new HashSet<String>(values.size());
+            synchronized (SecuredPreferenceStore.class) {
+                retryFunction(new Function<Void, Void>() {
+                    @Override
+                    public Void apply(Void t) throws Exception {
+                        String hashedKey = EncryptionManager.getHashed(key);
+                        Set<String> eSet = new HashSet<String>(values.size());
 
-                for (String val : values) {
-                    eSet.add(mEncryptionManager.encrypt(val));
-                }
+                        for (String val : values) {
+                            eSet.add(mEncryptionManager.encrypt(val));
+                        }
 
-                mEditor.putStringSet(hashedKey, eSet);
-            } catch (Exception e) {
-                Logger.e(e);
+                        mEditor.putStringSet(hashedKey, eSet);
+                        return null;
+                    }
+                }, null, null);
+
+                return this;
             }
-
-            return this;
         }
 
         @Override
@@ -426,6 +552,10 @@ public class SecuredPreferenceStore implements SharedPreferences {
          * @return true if the error could be resolved
          */
         boolean onRecoveryRequired(Exception e, KeyStore keyStore, List<String> keyAliases);
+    }
+
+    public interface Function<T, R> {
+        R apply(T t) throws Exception;
     }
 
     //region Migration

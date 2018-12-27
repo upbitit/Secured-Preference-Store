@@ -3,6 +3,8 @@ package devliving.online.securedpreferencestoresample;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     EditText text1, number1, date1, text2, number2;
 
-    Button reloadButton, saveButton, imageDemoBtn;
+    Button reloadButton, saveButton, multiThreadingButton, imageDemoBtn;
 
     String TEXT_1 = "text_short", TEXT_2 = "text_long", NUMBER_1 = "number_int", NUMBER_2 = "number_float", DATE_1 = "date_text", DATE_2 = "date_long";
 
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         reloadButton = (Button) findViewById(R.id.reload);
         saveButton = (Button) findViewById(R.id.save);
+        multiThreadingButton = (Button) findViewById(R.id.multi_threading);
         imageDemoBtn = findViewById(R.id.tryFile);
 
         try {
@@ -79,6 +82,49 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        multiThreadingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Runnable saveJob = new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("queen", Thread.currentThread().getName() + " gets started");
+                        while(true) {
+                            saveData();
+                            reloadData();
+                        }
+                    }
+                };
+
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+                new Thread(saveJob).start();
+            }
+        });
+
 
         imageDemoBtn.setOnClickListener(v -> {
             Intent intent = new Intent(this, FileDemoActivity.class);
@@ -106,17 +152,22 @@ public class MainActivity extends AppCompatActivity {
     void reloadData()  {
         SecuredPreferenceStore prefStore = SecuredPreferenceStore.getSharedInstance();
 
-        String textShort = prefStore.getString(TEXT_1, null);
-        String textLong = prefStore.getString(TEXT_2, null);
-        int numberInt = prefStore.getInt(NUMBER_1, 0);
-        float numberFloat = prefStore.getFloat(NUMBER_2, 0);
-        String dateText = prefStore.getString(DATE_1, null);
+        final String textShort = prefStore.getString(TEXT_1, null);
+        final String textLong = prefStore.getString(TEXT_2, null);
+        final int numberInt = prefStore.getInt(NUMBER_1, 0);
+        final float numberFloat = prefStore.getFloat(NUMBER_2, 0);
+        final String dateText = prefStore.getString(DATE_1, null);
 
-        text1.setText(textShort);
-        text2.setText(textLong);
-        number1.setText(String.valueOf(numberInt));
-        number2.setText(String.valueOf(numberFloat));
-        date1.setText(dateText);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                text1.setText(textShort);
+                text2.setText(textLong);
+                number1.setText(String.valueOf(numberInt));
+                number2.setText(String.valueOf(numberFloat));
+                date1.setText(dateText);
+            }
+        });
     }
 
     void saveData() {
