@@ -2,6 +2,8 @@ package devliving.online.securedpreferencestoresample;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -77,12 +79,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Log.d("queen", Thread.currentThread().getName() + " gets started");
                 while(true) {
-//                    try {
-//                        Thread.sleep(0);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-                    saveData();
+//                    saveData();
+                    reloadData();
                 }
             }
         };
@@ -135,17 +133,22 @@ public class MainActivity extends AppCompatActivity {
     void reloadData()  {
         SecuredPreferenceStore prefStore = SecuredPreferenceStore.getSharedInstance();
 
-        String textShort = prefStore.getString(TEXT_1, null);
-        String textLong = prefStore.getString(TEXT_2, null);
-        int numberInt = prefStore.getInt(NUMBER_1, 0);
-        float numberFloat = prefStore.getFloat(NUMBER_2, 0);
-        String dateText = prefStore.getString(DATE_1, null);
+        final String textShort = prefStore.getString(TEXT_1, null);
+        final String textLong = prefStore.getString(TEXT_2, null);
+        final int numberInt = prefStore.getInt(NUMBER_1, 0);
+        final float numberFloat = prefStore.getFloat(NUMBER_2, 0);
+        final String dateText = prefStore.getString(DATE_1, null);
 
-        text1.setText(textShort);
-        text2.setText(textLong);
-        number1.setText(String.valueOf(numberInt));
-        number2.setText(String.valueOf(numberFloat));
-        date1.setText(dateText);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                text1.setText(textShort);
+                text2.setText(textLong);
+                number1.setText(String.valueOf(numberInt));
+                number2.setText(String.valueOf(numberFloat));
+                date1.setText(dateText);
+            }
+        });
     }
 
     void saveData() {
