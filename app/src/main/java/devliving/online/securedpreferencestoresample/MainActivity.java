@@ -154,9 +154,15 @@ public class MainActivity extends AppCompatActivity {
 
         final String textShort = prefStore.getString(TEXT_1, null);
         final String textLong = prefStore.getString(TEXT_2, null);
-        final int numberInt = prefStore.getInt(NUMBER_1, 0);
-        final float numberFloat = prefStore.getFloat(NUMBER_2, 0);
+        final int numberInt = prefStore.getInt(NUMBER_1, Integer.MIN_VALUE);
+        final float numberFloat = prefStore.getFloat(NUMBER_2, Float.MIN_VALUE);
         final String dateText = prefStore.getString(DATE_1, null);
+
+        if(textShort == null) throw new IllegalStateException("textShort is null");
+        if(textLong == null) throw new IllegalStateException("textLong is null");
+        if(numberInt == Integer.MIN_VALUE) throw new IllegalStateException("numberInt is null");
+        if(numberFloat == Float.MIN_VALUE) throw new IllegalStateException("numberFloat is null");
+        if(dateText == null) throw new IllegalStateException("dateText is null");
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
