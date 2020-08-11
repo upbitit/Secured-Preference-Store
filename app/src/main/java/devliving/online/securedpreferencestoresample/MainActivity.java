@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         multiThreadingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Runnable saveJob = new Runnable() {
+                Runnable saveAndReloadJob = new Runnable() {
                     @Override
                     public void run() {
                         Log.d("queen", Thread.currentThread().getName() + " gets started");
@@ -96,32 +96,32 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
 
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
+                new Thread(saveAndReloadJob).start();
             }
         });
 
@@ -167,6 +167,11 @@ public class MainActivity extends AppCompatActivity {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
+                Log.d("queen", "textShort : " + textShort +
+                        ", textLong : " + textLong +
+                        ", numberInt : " + numberInt +
+                        ", numberFloat : " + numberFloat +
+                        ", dateText : " + dateText);
                 text1.setText(textShort);
                 text2.setText(textLong);
                 number1.setText(String.valueOf(numberInt));
