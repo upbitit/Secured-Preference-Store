@@ -12,6 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.List;
 
@@ -22,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     EditText text1, number1, date1, text2, number2;
 
-    Button reloadButton, saveButton, multiThreadingButton, imageDemoBtn;
+    Button reloadButton, saveButton, multiThreadingButton, multiThreadingButton2, imageDemoBtn;
 
     String TEXT_1 = "text_short", TEXT_2 = "text_long", NUMBER_1 = "number_int", NUMBER_2 = "number_float", DATE_1 = "date_text", DATE_2 = "date_long";
 
@@ -41,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         reloadButton = (Button) findViewById(R.id.reload);
         saveButton = (Button) findViewById(R.id.save);
         multiThreadingButton = (Button) findViewById(R.id.multi_threading);
+        multiThreadingButton2 = (Button) findViewById(R.id.multi_threading_2);
         imageDemoBtn = findViewById(R.id.tryFile);
 
         try {
@@ -85,51 +91,73 @@ public class MainActivity extends AppCompatActivity {
         multiThreadingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Runnable saveJob = new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("queen", Thread.currentThread().getName() + " gets started");
-                        while(true) {
-                            saveData();
-                            reloadData();
-                        }
-                    }
-                };
-
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
-                new Thread(saveJob).start();
+                runConcurrentJobs(SecuredPreferenceStore.getSharedInstance());
             }
         });
 
+        multiThreadingButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    runConcurrentJobs(EncryptedSharedPreferences.create(
+                            "pref_file",
+                            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+                            MainActivity.this,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                    ));
+                } catch (GeneralSecurityException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         imageDemoBtn.setOnClickListener(v -> {
             Intent intent = new Intent(this, FileDemoActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void runConcurrentJobs(SharedPreferences pref) {
+        Runnable saveJob = new Runnable() {
+            @Override
+            public void run() {
+                Log.d("queen", Thread.currentThread().getName() + " gets started");
+                while(true) {
+                    saveData(pref);
+                    reloadData(pref);
+                }
+            }
+        };
+
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
+        new Thread(saveJob).start();
     }
 
     private void setupStore() {
@@ -149,9 +177,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void reloadData()  {
-        SecuredPreferenceStore prefStore = SecuredPreferenceStore.getSharedInstance();
+    void reloadData() {
+        reloadData(SecuredPreferenceStore.getSharedInstance());
+    }
 
+    void reloadData(SharedPreferences prefStore)  {
         final String textShort = prefStore.getString(TEXT_1, null);
         final String textLong = prefStore.getString(TEXT_2, null);
         final int numberInt = prefStore.getInt(NUMBER_1, 0);
@@ -171,8 +201,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void saveData() {
-        SecuredPreferenceStore prefStore = SecuredPreferenceStore.getSharedInstance();
+        saveData(SecuredPreferenceStore.getSharedInstance());
+    }
 
+    void saveData(SharedPreferences prefStore) {
         prefStore.edit().putString(TEXT_1, text1.length() > 0 ? text1.getText().toString() : null).apply();
         prefStore.edit().putString(TEXT_2, text2.length() > 0 ? text2.getText().toString() : null).apply();
 
